@@ -672,23 +672,4 @@ class RosterAPI {
   
 }
 
-$t = new RosterAPI("Eitrigg", "Kastang", "We Know");
-
-/*
-print_r($t->getProfessions());
-print_r($t->getTalents());
-echo $t->getPower().'<br />';
-print_r($t->getStat("spellhaste"));
-echo $t->getClass();
-echo $t->getRace();
-echo $t->getAchievementPoints();
-echo $t->getHealth().'<br />';
-echo $t->getLevel();
-print_r($t->getGuildMembers(true));
-*/
-
-print_r($t->getGuildPerks());
-echo $t->getGender();
-print_r($t->getTopWeeklyContributers());
-
 ?>
