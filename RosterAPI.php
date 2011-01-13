@@ -72,7 +72,7 @@ class RosterAPI {
      * SERVERS. 
      */
     private $CHAR_PAGE_URL = "http://us.battle.net/wow/en/character/";
-	private $GUILD_PAGE_URL = "http://us.battle.net/wow/en/guild/";
+    private $GUILD_PAGE_URL = "http://us.battle.net/wow/en/guild/";
 
     /* 
      * The below values should not be modified. 
@@ -80,7 +80,7 @@ class RosterAPI {
     private $characterDom = null;
     private $character = null;
     private $server = null;
-	private $guild = null;
+    private $guild = null;
     private $characterPage = null;
 
     /**
@@ -100,7 +100,7 @@ class RosterAPI {
 
         $this->character = $character;
         $this->server = $server;
-		$this->guild = rawurlencode($guild);
+        $this->guild = rawurlencode($guild);
 
         $this->changeCharacter($character);
     }
@@ -119,21 +119,21 @@ class RosterAPI {
      * This function returns the URL for the Guild Perks page for user-set 
      * server and guild. 
      */
-	private function guildPerksURLBuilder() {
+    private function guildPerksURLBuilder() {
 
-		$guildPerk = $this->GUILD_PAGE_URL.$this->server.'/'.$this->guild.'/perk';
-		return $guildPerk;
-	}
+        $guildPerk = $this->GUILD_PAGE_URL.$this->server.'/'.$this->guild.'/perk';
+        return $guildPerk;
+    }
 
     /**
      * This function returns the URL for the Guild Roster page for user-set 
      * server and guild. 
      */
-	private function guildRosterURLBuilder() {
+    private function guildRosterURLBuilder() {
 
-		$guildPage = $this->GUILD_PAGE_URL.$this->server.'/'.$this->guild.'/roster';
-		return $guildPage;
-	}
+        $guildPage = $this->GUILD_PAGE_URL.$this->server.'/'.$this->guild.'/roster';
+        return $guildPage;
+    }
 
     /**
      * This function returns the URL for the Character page for user-set server
@@ -278,9 +278,9 @@ class RosterAPI {
      *
      * The array is returned. 
      */
-	public function getGuildMembers($rank = false) {
+    public function getGuildMembers($rank = false) {
 
-		$guildArray = array();
+        $guildArray = array();
 
         $guildCacheFile = $this->CACHEDIR.$this->guild.'_roster.html';
   
@@ -292,19 +292,19 @@ class RosterAPI {
         }
 
         /*
-		$dom = new domDocument;
+        $dom = new domDocument;
         $dom->loadHTML($guildPage);    
         $dom->preserveWhiteSpace = false;
         */
     
         $dom = $this->loadNewDom($guildPage);
 
-		$roster = $dom->getElementsByTagName('tbody');
-    	$char = $roster->item(0)->getElementsByTagName('tr');
+        $roster = $dom->getElementsByTagName('tbody');
+        $char = $roster->item(0)->getElementsByTagName('tr');
  
-    	foreach ($char as $c) {
+        foreach ($char as $c) {
 
-			$charInfo = $c->getElementsByTagName('td');
+            $charInfo = $c->getElementsByTagName('td');
 
             if(!$rank) { 
 
@@ -315,10 +315,10 @@ class RosterAPI {
                 $guildArray[$charInfo->item(0)->nodeValue] =
                                      substr(trim($charInfo->item(4)->nodeValue), -1);
             }
-		}
+        }
 
-		return $guildArray;
-	}
+        return $guildArray;
+    }
 
 
 
@@ -343,7 +343,7 @@ class RosterAPI {
         }
 
         /*
-		$dom = new domDocument;
+        $dom = new domDocument;
         $dom->loadHTML($perksPage);    
         $dom->preserveWhiteSpace = false;
         */
@@ -388,7 +388,7 @@ class RosterAPI {
         }
 
         /*
-		$dom = new domDocument;
+        $dom = new domDocument;
         $dom->loadHTML($contribPage);    
         $dom->preserveWhiteSpace = false;
         */
@@ -435,7 +435,7 @@ class RosterAPI {
         }
 
         /*
-		$dom = new domDocument;
+        $dom = new domDocument;
         $dom->loadHTML($guildPage);    
         $dom->preserveWhiteSpace = false;
         */
@@ -444,16 +444,16 @@ class RosterAPI {
 
 
         $roster = $dom->getElementsByTagName('tbody');
-    	$char = $roster->item(0)->getElementsByTagName('tr');
+        $char = $roster->item(0)->getElementsByTagName('tr');
 
         /*
          * Loop through every character in the guild until the character
          * is found. When it is found, return the gender Id based off the
          * image link on the Roster. 
          */ 
-    	foreach ($char as $c) {
+        foreach ($char as $c) {
 
-			$charInfo = $c->getElementsByTagName('td');
+            $charInfo = $c->getElementsByTagName('td');
             $charImages = $c->getElementsByTagName('img');
 
             if(strtolower($charInfo->item(0)->nodeValue) == strtolower($this->character)) {
@@ -566,6 +566,17 @@ class RosterAPI {
         return $profArray;
     }
 
+    /**
+     * Returns an associative array containing the values of Talent Tree 1 and 
+     * Talent Tree 2. 
+     *
+     * If the character does not have any talents selected for one of the trees, 
+     * the name and talent points will return an empty string. 
+     * 
+     * The returned array is in the format of:
+     * Talent Tree 1: Name: talent1 Value: talent1points
+     * Talent Tree 2: Name: talent2 Value: talent2points
+     */
     public function getTalents() {
 
         $xpath = new DOMXPath($this->characterDom);
@@ -584,14 +595,14 @@ class RosterAPI {
         if(($talents->item(0)->nodeValue == "Talents") && ($talents->item(1)->nodeValue == "Talents")) {
 
             $talentArray = array("talent1" => "",
-                                    "talent1points" => $talentPoints->item(0)->nodeValue,
+                                    "talent1points" => "",
                                     "talent2" => "",
-                                    "talent2points" => $talentPoints->item(1)->nodeValue);
+                                    "talent2points" => "");
 
         } else if($talents->item(0)->nodeValue == "Talents") {
         
             $talentArray = array("talent1" => "",
-                                    "talent1points" => $talentPoints->item(0)->nodeValue,
+                                    "talent1points" => "",
                                     "talent2" => $talents->item(1)->nodeValue,
                                     "talent2points" => $talentPoints->item(1)->nodeValue);
 
@@ -600,7 +611,7 @@ class RosterAPI {
             $talentArray = array("talent1" => $talents->item(0)->nodeValue,
                                     "talent1points" => $talentPoints->item(0)->nodeValue,
                                     "talent2" => "",
-                                    "talent2points" => $talentPoints->item(1)->nodeValue);
+                                    "talent2points" => "");
         } else {
 
             $talentArray = array("talent1" => $talents->item(0)->nodeValue,
