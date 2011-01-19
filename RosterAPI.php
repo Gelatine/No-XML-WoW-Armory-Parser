@@ -33,6 +33,9 @@
  * Guild:
  * Names, Perks, Top Weekly Contributers. 
  *
+ * No additional libraries are needed other then what is included by 
+ * default with PHP5. 
+ *
  * @author Josh Grochowski (josh[at]kastang[dot]com)
  */
 
@@ -62,7 +65,7 @@ class RosterAPI {
      * 
      * Example: /path/to/cache/directory/
      */
-    private $CACHEDIR = '/path/to/cache/directory/';
+    private $CACHEDIR = '/home/kastang/projects/rosterAPI/cache/';
 
     /*
      * The $CHAR_PAGE_URL and $GUILD_PAGE_URL variables should not need
@@ -84,25 +87,52 @@ class RosterAPI {
     private $characterPage = null;
 
     /**
-     * The constructor requires a $server and $character be specified
+     * The constructor requires a $server be specified
      * during the creation of the object. The $guild variable is
      * optional unless the guild specific functions in this class 
-     * will be used. The $server, $character, and $guild variables can
-     * be modified at any time.
+     * will be used. The $character variable is also optional. Both
+     * the $guild and $character variable cannot be empty thoug because
+     * the script would serve no purpose with both being null. The 
+     * $server, $character, and $guild variables can be modified 
+     * at any time.
      */
-    public function __construct($server, $character, $guild='') {
+    public function __construct($server, $character='', $guild='') {
 
-        if(empty($server) || empty($character)) {
-            throw new Exception("Invalid Server or Character.");
+        /* 
+         * Without $server being set, the correct guild and/or
+         * character cannot be found. 
+         */
+        if(empty($server)) {
+            throw new Exception("The Server Variable must be set.");
+        } else {
+            $this->server = $server;
         }
 
-        $this->characterDom = new domDocument;
+        /*
+         * Without a Guild and Character name, the script serves no function. 
+         */
+        if(empty($guild) && empty($character)) {
+            throw new Exception("A Guild Name And/Or Character Name must be set.");
+        }
 
-        $this->character = $character;
-        $this->server = $server;
-        $this->guild = rawurlencode($guild);
+        /*
+         * If the $guild variable is specified, set the
+         * globar $guild variable. 
+         */
+        if(!empty($guild)) {
+            $this->guild = rawurlencode($guild);
+        }
 
-        $this->changeCharacter($character);
+        /*
+         * If the character is set in the constructor, 
+         * populate the $character and $characterDom
+         * variable. 
+         */
+        if(!empty($character)) {
+            $this->characterDom = new domDocument;
+            $this->character = $character;
+            $this->changeCharacter($character);
+        }
     }
 
     /**
