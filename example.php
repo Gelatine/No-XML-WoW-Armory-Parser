@@ -51,6 +51,7 @@ echo $api->getRace().'   ';
 echo $api->getAchievementPoints().'   ';
 echo $api->getHealth().'   ';
 echo $api->getLevel().'   ';
+echo $api->getItemLevel().'   ';
 echo $api->getGender().'   ';
 
 //For a complete list of Stat possibilities, 
