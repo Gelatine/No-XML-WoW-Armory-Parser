@@ -496,6 +496,18 @@ class RosterAPI {
 
     }
 
+    /**
+     * Returns the Equipped Gear iLvl of the
+     * Character. 
+     */
+    public function getItemLevel() {
+
+        $xpath = new DOMXPath($this->characterDom);
+        $iLvl = $xpath->query('//span[@class="equipped"]');
+
+        return $iLvl->item(0)->nodeValue;
+    }
+
 
     /**
      * Returns the Level of the Character. 
