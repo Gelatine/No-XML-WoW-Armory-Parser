@@ -28,7 +28,8 @@
  *
  * Character:
  * Level, Race, Class, Achievement Points, Health, Power, 
- * Professions(names/values), Talents(names/points). 
+ * Professions(names/values), Talents(names/points), 
+ * Equipped Item Level. 
  *
  * Guild:
  * Names, Perks, Top Weekly Contributers. 
