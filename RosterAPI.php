@@ -65,7 +65,7 @@ class RosterAPI {
      * 
      * Example: /path/to/cache/directory/
      */
-    private $CACHEDIR = '/home/kastang/projects/rosterAPI/cache/';
+    private $CACHEDIR = '/path/to/cache/directory/';
 
     /*
      * The $CHAR_PAGE_URL and $GUILD_PAGE_URL variables should not need

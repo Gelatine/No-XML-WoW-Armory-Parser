@@ -29,8 +29,8 @@ include('./RosterAPI.php');
  * variables with your information
  */
 $server = "Eitrigg";
-$character = "Kastang";
 $guild = "We Know";
+$character = "Kastang";
 
 //Creates the RosterAPI Object. 
 $api = new RosterAPI($server, $character, $guild);
@@ -38,7 +38,7 @@ $api = new RosterAPI($server, $character, $guild);
 /*
  * Guild specific information
  */
-print_r($api->getGuildMembers(true));
+#print_r($api->getGuildMembers(true));
 print_r($api->getGuildPerks());
 print_r($api->getTopWeeklyContributers());
 

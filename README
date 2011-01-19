@@ -4,6 +4,5 @@ A few changes must be made in RosterAPI.php before becoming functional:
 write permissions. This directory will store HTML files used for Cacheing.
 
 
-
 If you find any bugs or have feature requests, please contact me at:
 josh[at]kastang[dot]com.
