@@ -172,7 +172,7 @@ class RosterAPI {
      */
     private function charPageURLBuilder() {
 
-        $charPage = $this->CHAR_PAGE_URL.$this->server.'/'.$this->character.'/simple';
+        $charPage = $this->CHAR_PAGE_URL.$this->server.'/'.$this->character.'/advanced';
         return $charPage;
     }
    
@@ -722,6 +722,60 @@ class RosterAPI {
                             "value" => $statValue->item(0)->nodeValue);
 
         return $statArray;
+    }
+
+    /**
+     * Returns an Array of items currently equipped on the character
+     *
+     * The Index of the array corresponds to 
+     * 
+     * 0 - Head
+     * 1 - Neck
+     * 2 - Shoulder
+     * 3 - Shirt
+     * 4 - Chest
+     * 5 - Belt
+     * 6 - Legs
+     * 7 - Feet
+     * 8 - Bracers
+     * 9 - Gloves
+     * 10 - Ring #1
+     * 11 - Ring #2
+     * 12 - Trinket #1
+     * 13 - Trinket #2
+     * 14 - Cloak
+     * 15 - Main Weapon 
+     * 16 - Offhand/Secondary Weapon
+     * 17 - Wand
+     * 18 - Tabard
+     *
+     * If the character does not have an item equipped, an empty
+     * entry will be added to the index to preserve the index numbering. 
+     */
+    public function getItems() {
+
+        $itemArray = array();
+
+        $xpath = new DOMXPath($this->characterDom);
+
+        /*
+         * Characters can equipt 19 different items. 
+         */
+        $MAX_ITEMS = 18;
+
+
+        /*
+         * Generates the Array adding every item in the order expressed
+         * above.
+         */
+        for($i=0; $i<=$MAX_ITEMS; $i++) {
+
+            $itemName = $xpath->query('//div[@data-id="'.$i.'"]/div[@class="slot-inner"]/div[@class="slot-contents"]/div[@class="details"]/span[@class="name-shadow"]');
+
+            array_push($itemArray, $itemName->item(0)->nodeValue);
+        }
+
+        return $itemArray;
     }
   
 }
