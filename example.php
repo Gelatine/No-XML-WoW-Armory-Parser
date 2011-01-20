@@ -64,4 +64,6 @@ echo $s["value"].'   ';
 print_r($api->getProfessions());
 print_r($api->getTalents());
 
+print_r($api->getItems());
+
 ?>
