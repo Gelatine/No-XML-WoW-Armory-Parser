@@ -29,7 +29,7 @@
  * Character:
  * Level, Race, Class, Achievement Points, Health, Power, 
  * Professions(names/values), Talents(names/points), 
- * Equipped Item Level. 
+ * Equipped Item Level, Equipped Items. 
  *
  * Guild:
  * Names, Perks, Top Weekly Contributers. 
@@ -39,6 +39,8 @@
  *
  * @author Josh Grochowski (josh[at]kastang[dot]com)
  */
+
+header('Content-Type: text/html; charset=UTF-8');
 
 class RosterAPI {
 
@@ -336,23 +338,21 @@ class RosterAPI {
         foreach ($char as $c) {
 
             $charInfo = $c->getElementsByTagName('td');
+            $charName = $charInfo->item(0)->nodeValue;
 
             if(!$rank) { 
 
-                array_push($guildArray, $charInfo->item(0)->nodeValue);
+                array_push($guildArray, utf8_decode($charName));
 
             } else {
            
-                $guildArray[$charInfo->item(0)->nodeValue] =
+                $guildArray[utf8_decode($charName)] =
                                      substr(trim($charInfo->item(4)->nodeValue), -1);
             }
         }
 
         return $guildArray;
     }
-
-
-
 
     /**
      * This function will return an array of all the perks the user-set
@@ -755,7 +755,6 @@ class RosterAPI {
     public function getItems() {
 
         $itemArray = array();
-
         $xpath = new DOMXPath($this->characterDom);
 
         /*
