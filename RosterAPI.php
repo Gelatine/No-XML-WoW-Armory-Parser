@@ -725,7 +725,12 @@ class RosterAPI {
     }
 
     /**
-     * Returns an Array of items currently equipped on the character
+     * Returns an Associative Array of the items currently equipped 
+     * on the character along with the enchants on each item. 
+     *
+     * The Associative Array uses the following names:
+     * "name" = The Name of the Item. 
+     * "enchant" = The Name of the Enchant on the Item.
      *
      * The Index of the array corresponds to 
      * 
@@ -751,6 +756,8 @@ class RosterAPI {
      *
      * If the character does not have an item equipped, an empty
      * entry will be added to the index to preserve the index numbering. 
+     * Items without enchants will return an empty entry for the Enchant. 
+     *
      */
     public function getItems() {
 
@@ -762,7 +769,6 @@ class RosterAPI {
          */
         $MAX_ITEMS = 18;
 
-
         /*
          * Generates the Array adding every item in the order expressed
          * above.
@@ -771,7 +777,22 @@ class RosterAPI {
 
             $itemName = $xpath->query('//div[@data-id="'.$i.'"]/div[@class="slot-inner"]/div[@class="slot-contents"]/div[@class="details"]/span[@class="name-shadow"]');
 
-            array_push($itemArray, $itemName->item(0)->nodeValue);
+            $itemEnchant = $xpath->query('//div[@data-id="'.$i.'"]/div[@class="slot-inner"]/div[@class="slot-contents"]/div[@class="details"]/span[@class="enchant-shadow"]');
+
+            $tmp = array(
+                    "name" => $itemName->item(0)->nodeValue,
+                    "enchant" => trim($itemEnchant->item(0)->nodeValue));
+
+            if(empty($itemName->item(0)->nodeValue)) {
+    
+                array_push($itemArray, "");
+
+            } else {
+
+                array_push($itemArray, $tmp);
+           
+            } 
+            
         }
 
         return $itemArray;
