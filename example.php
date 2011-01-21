@@ -66,4 +66,21 @@ print_r($api->getTalents());
 
 print_r($api->getItems());
 
+
+/*
+ * The Item Array acts a little differently
+ * then the other arrays because it stores
+ * an Array of Arrays for Gems. 
+ */
+$itemArray = $api->getItems();
+
+/* 
+ * To Retreive A Gem Name:
+ * $itemArray[ITEM_INDEX]["gems"][GEM_INDEX];
+ *
+ * To Retreive A Name, Enchant, Level of an 
+ * Item is much more straight forward:
+ * $itemArray[ITEM_INDEX]["name OR level OR enchant"];
+ */
+
 ?>
