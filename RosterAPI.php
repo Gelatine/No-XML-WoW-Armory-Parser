@@ -29,13 +29,16 @@
  * Character:
  * Level, Race, Class, Achievement Points, Health, Power, 
  * Professions(names/values), Talents(names/points), 
- * Equipped Item Level, Equipped Items. 
+ * Equipped Item Level, Equipped Items(name, enchants, level, gems). 
  *
  * Guild:
  * Names, Perks, Top Weekly Contributers. 
  *
  * No additional libraries are needed other then what is included by 
  * default with PHP5. 
+ *
+ * PLEASE READ THE DOCUMENTATION ABOVE EACH FUNCTION FOR HELP ON HOW
+ * TO USE EACH FUNCTION. 
  *
  * @author Josh Grochowski (josh[at]kastang[dot]com)
  */
@@ -187,11 +190,20 @@ class RosterAPI {
      *
      * An exception will be thrown if the $file variable is empty. 
      */ 
-    private function isCached($file) {
+    private function isCached($file, $item='false') {
 
         //Verifies the file path is not empty. 
         if(empty($file)) {
             throw new Exception("Empty File Name.");
+        }
+
+        //If the object being checked is an item, there is no need to
+        //update the item at the end of the cache period. 
+        if($item == true) {
+            if(file_exists($file)) {
+                echo "FILE EXISTS";
+                return true;
+            }
         }
 
         //If the file already exists and it is within the cache window, 
@@ -726,11 +738,21 @@ class RosterAPI {
 
     /**
      * Returns an Associative Array of the items currently equipped 
-     * on the character along with the enchants on each item. 
+     * on the character along with the enchants on each item, an Array
+     * of Gem Names, and the item level. 
      *
      * The Associative Array uses the following names:
      * "name" = The Name of the Item. 
+     * "level" = iLvl of the Item. 
      * "enchant" = The Name of the Enchant on the Item.
+     * "gem"[INDEX_NUMBER] = An array of Gems equipped to the item, 
+     * the INDEX_NUMBER will range from 0..n depending on the number
+     * of equipped Gems. 
+     *
+     * NOTE: THIS METHOD HAS A HIGH POTIENTIAL OF OVERFLOWING THE PAGE 
+     * REQUEST LIMIT ON WOW SERVERS BECAUSE OF HOW THE GEM DATA MUST BE
+     * PULLED. USE THIS METHOD SPARINGLY THE FIRST TIME IT IS RAN, THE
+     * ITEMS WILL BE CACHED AFTER THE FIRST RUN. 
      *
      * The Index of the array corresponds to 
      * 
@@ -779,20 +801,88 @@ class RosterAPI {
 
             $itemEnchant = $xpath->query('//div[@data-id="'.$i.'"]/div[@class="slot-inner"]/div[@class="slot-contents"]/div[@class="details"]/span[@class="enchant-shadow"]');
 
+            $itemLevel = $xpath->query('//div[@data-id="'.$i.'"]/div[@class="slot-inner"]/div[@class="slot-contents"]/div[@class="details"]/span[@class="level"]');
+
+            $itemGems = $xpath->query('//div[@data-id="'.$i.'"]/div[@class="slot-inner"]/div[@class="slot-contents"]/div[@class="details"]/span[@class="sockets"]/span/a/@href');
+
+
+            /*
+             * Items can have multiple Gems. The WoW Armory only returns
+             * the link to the gem item. After gathering all of the gems
+             * for a particular item, each link must grab another HTML
+             * file and the name of the Gem must be parsed from it. 
+             */
+            $tmpGemArray = array();
+            foreach($itemGems as $gems) {
+                array_push($tmpGemArray, $gems->nodeValue);
+            }
+
+
+            /*
+             * Now that we have all of the links, we need to parse 
+             * every file and pull the name and store it into another
+             * array. 
+             */
+            $gemNameArray = array();
+
+            foreach($tmpGemArray as $gemLink) {
+
+                $gemId = explode('/', $gemLink);
+                
+                //TODO: Add Link Builder. 
+                $link = "http://us.battle.net".$gemLink;
+
+                /*
+                 * Checks to see if the Gem has been cached, this will
+                 * lower requests and speed up result times. 
+                 */
+                $gemCacheFile = $this->CACHEDIR.$gemId[4].'.html';
+                if($this->isCached($gemCacheFile, true)) {
+
+                    $gemPage = file_get_contents($gemCacheFile);
+
+                } else {
+
+                    $gemPage = file_get_contents($link);
+                    file_put_contents($gemCacheFile, $gemPage);
+                }
+
+
+                $dom = $this->loadNewDom($gemPage);
+                $gXP = new DOMXPath($dom);
+
+                /*
+                 * The easiest way to pull the Gem name is via the
+                 * <title> tag on the Gems Page. 
+                 */
+                $gn = $gXP->query('//title');
+                $gemName = explode("-", $gn->item(0)->nodeValue);
+
+                array_push($gemNameArray, $gemName[0]);
+
+            }
+
+            /*
+             * PHP will shoot notices if there are no entries matching
+             * a particular query. Example, An item not equipped, no enchants
+             * on an item, etc. The warnings are supressed. 
+             */
             $tmp = array(
-                    "name" => $itemName->item(0)->nodeValue,
-                    "enchant" => trim($itemEnchant->item(0)->nodeValue));
 
+                    "name" => @$itemName->item(0)->nodeValue,
+                    "level" => @$itemLevel->item(0)->nodeValue,
+                    "enchant" => trim(@$itemEnchant->item(0)->nodeValue),
+                    "gems" => @$gemNameArray);
+
+            /*
+             * If the Item is not equipped on the character, we want an empty 
+             * array returned. 
+             */
             if(empty($itemName->item(0)->nodeValue)) {
-    
                 array_push($itemArray, "");
-
             } else {
-
                 array_push($itemArray, $tmp);
-           
             } 
-            
         }
 
         return $itemArray;
