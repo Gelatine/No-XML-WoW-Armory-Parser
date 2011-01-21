@@ -1,3 +1,23 @@
+/*
+ * This RosterAPI class provides an API for the WoW Armory by parsing
+ * the armory XHTML files. This class handles both Guild and
+ * individual Character parsing.
+ *
+ * Character:
+ * Level, Race, Class, Achievement Points, Health, Power,
+ * Professions(names/values), Talents(names/points),
+ * Equipped Item Level, Equipped Items.
+ *
+ * Guild:
+ * Names, Perks, Top Weekly Contributers.
+ *
+ * No additional libraries are needed other then what is included by
+ * default with PHP5.
+ *
+ * @author Josh Grochowski (josh[at]kastang[dot]com)
+ */
+
+
 A few changes must be made in RosterAPI.php before becoming functional:
 
 * The $CACHEDIR variable must provide an absolute path to a directory with 
