@@ -6,7 +6,7 @@
  * Character:
  * Level, Race, Class, Achievement Points, Health, Power,
  * Professions(names/values), Talents(names/points),
- * Equipped Item Level, Equipped Items.
+ * Equipped Item Level, Equipped Items, and Statistics. 
  *
  * Guild:
  * Names, Perks, Top Weekly Contributers.
@@ -18,7 +18,7 @@
  */
 
 
-A few changes must be made in RosterAPI.php before becoming functional:
+A few changes must be made in Functions.php before becoming functional:
 
 * The $CACHEDIR variable must provide an absolute path to a directory with 
 write permissions. This directory will store HTML files used for Cacheing.
