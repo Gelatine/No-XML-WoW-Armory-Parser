@@ -35,7 +35,7 @@
  * Names, Perks, Top Weekly Contributers. 
  *
  * No additional libraries are needed other then what is included by 
- * default with PHP5. 
+ * default with __PHP5__. 
  *
  * PLEASE READ THE DOCUMENTATION ABOVE EACH FUNCTION FOR HELP ON HOW
  * TO USE EACH FUNCTION. 
@@ -44,34 +44,10 @@
  */
 
 header('Content-Type: text/html; charset=UTF-8');
+include_once('Functions.php');
+include('Statistics.php');
 
 class RosterAPI {
-
-    /*
-     * The $CACHETIME variable can be modified depending on how
-     * often you want to pull new information from the Roster. 
-     *
-     * Recommended: A value greater >= 3600.
-     *
-     * Not Recommended: To turn off Cacheing, set $CACHETIME to
-     * -1. If this script will be ran often, you risk the chance
-     * being banned from the WoW Armory for exceeding the maximum
-     * number of requests per minute/hour/day. 
-     *
-     * The default $CACHETIME value is 5 Hours.
-     * (60 seconds * 60 minutes)*5. 
-     */
-    private $CACHETIME = 18000;
-
-    /*
-     * The $CACHEDIR variable must be the absolute path to 
-     * a desired cache directory. The directory must have write
-     * permissions (chmod 777 the directory). The path should also 
-     * contain a trailing slash ('/'). 
-     * 
-     * Example: /path/to/cache/directory/
-     */
-    private $CACHEDIR = '/path/to/cache/directory/';
 
     /*
      * The $CHAR_PAGE_URL and $GUILD_PAGE_URL variables should not need
@@ -91,6 +67,8 @@ class RosterAPI {
     private $server = null;
     private $guild = null;
     private $characterPage = null;
+
+    private $statistics = null;
 
     /**
      * The constructor requires a $server be specified
@@ -139,6 +117,9 @@ class RosterAPI {
             $this->character = $character;
             $this->changeCharacter($character);
         }
+
+           
+        $this->statistics = new Statistics(); 
     }
 
     /**
@@ -180,72 +161,6 @@ class RosterAPI {
         $charPage = $this->CHAR_PAGE_URL.$this->server.'/'.$this->character.'/advanced';
         return $charPage;
     }
-   
-    /**
-     * Given a path to a file, this function first checks if
-     * the file exists, if it has, it checks to see if it has
-     * been modified within the caching time. If both of the
-     * above criteras have been met, true is returned. Otherwise, 
-     * false is returned to the requesting runction. 
-     *
-     * An exception will be thrown if the $file variable is empty. 
-     */ 
-    private function isCached($file, $item='false') {
-
-        //Verifies the file path is not empty. 
-        if(empty($file)) {
-            throw new Exception("Empty File Name.");
-        }
-
-        //If the object being checked is an item, there is no need to
-        //update the item at the end of the cache period. 
-        if($item == true) {
-            if(file_exists($file)) {
-                echo "FILE EXISTS";
-                return true;
-            }
-        }
-
-        //If the file already exists and it is within the cache window, 
-        //return true. Otherwise, return false. 
-        if(file_exists($file)) {
-
-            $timeSinceModified = strtotime("now") - filemtime($file);
-
-            if($timeSinceModified > $this->CACHETIME) {
-
-                return false;
-
-            } else {
-
-                return true;
-            }
-
-        } else {
-
-            return false;
-
-        }
-
-    }
-    
-    /**
-     * Given an HTML page, loads the HTML into a domDocument and
-     * returns the 'object' to the requesting method. 
-     */
-    private function loadNewDom($domDoc) {
-
-        /*
-         * When loading the HTML file from the WoW Armory, I am 
-         * supressing warnings because domDocument expects valid 
-         * HTML markup. WoW Armory does not return valid markup.
-         */
-        $dom = new domDocument;
-        @$dom->loadHTML($domDoc);
-        $dom->preserveWhiteSpace = false;
-
-        return $dom;
-    }
 
     /**
      * This function changes the character. It checks to see
@@ -263,9 +178,10 @@ class RosterAPI {
 
         $this->character = $character;
 
-        $characterCacheFile = $this->CACHEDIR.$this->character.'.html';
-        
-        if($this->isCached($characterCacheFile)) {
+        $characterCacheFile = Functions::getCacheDir().$this->character.'.html';
+       
+        /* 
+        if(Functions::isCached($characterCacheFile)) {
 
             $this->characterPage = file_get_contents($characterCacheFile);
 
@@ -273,6 +189,20 @@ class RosterAPI {
 
             $this->characterPage = file_get_contents($this->charPageURLBuilder());
             file_put_contents($characterCacheFile, $this->characterPage);
+        }
+        */
+
+        $this->characterPage = Functions::getPageContents($this->charPageURLBuilder(), $characterCacheFile);
+       
+        /*
+         * If the WoW Armory returns a blank page, retry up to 5 times. 
+         * TODO: Change this to use loadNewDom() function.
+         */ 
+        $retries = 5;
+        while((empty($this->characterPage) && $retries>0)) {
+            echo 'Retry';
+            $this->characterPage = file_get_contents($this->charPageURLBuilder());
+            $retries--;
         }
 
         $this->characterDom->loadHTML($this->characterPage);    
@@ -327,22 +257,20 @@ class RosterAPI {
 
         $guildArray = array();
 
-        $guildCacheFile = $this->CACHEDIR.$this->guild.'_roster.html';
-  
-        if($this->isCached($guildCacheFile)) {
+        $guildCacheFile = Functions::getCacheDir().$this->guild.'_roster.html';
+ 
+        /* 
+        if(Functions::isCached($guildCacheFile)) {
             $guildPage = file_get_contents($guildCacheFile);
         } else {
             $guildPage = file_get_contents($this->guildRosterURLBuilder());
             file_put_contents($guildCacheFile, $guildPage);
         }
-
-        /*
-        $dom = new domDocument;
-        $dom->loadHTML($guildPage);    
-        $dom->preserveWhiteSpace = false;
         */
-    
-        $dom = $this->loadNewDom($guildPage);
+        
+        $guildPage = Functions::getPageContents($this->guildRosterURLBuilder(), $guildCacheFile);
+
+        $dom = Functions::loadNewDom($guildPage);
 
         $roster = $dom->getElementsByTagName('tbody');
         $char = $roster->item(0)->getElementsByTagName('tr');
@@ -376,22 +304,21 @@ class RosterAPI {
 
         $perksArray = array();
 
-        $perksCacheFile = $this->CACHEDIR.$this->guild.'_perks.html';
+        $perksCacheFile = Functions::getCacheDir().$this->guild.'_perks.html';
 
-        if($this->isCached($perksCacheFile)) {
+
+        /*
+        if(Functions::isCached($perksCacheFile)) {
             $perksPage = file_get_contents($perksCacheFile);
         } else {
             $perksPage = file_get_contents($this->guildPerksURLBuilder());
             file_put_contents($perksCacheFile, $perksPage);
         }
-
-        /*
-        $dom = new domDocument;
-        $dom->loadHTML($perksPage);    
-        $dom->preserveWhiteSpace = false;
         */
 
-        $dom = $this->loadNewDom($perksPage);
+        $perksPage = Functions::getPageContents($this->guildPerksURLBuilder(), $perksCacheFile);
+
+        $dom = Functions::loadNewDom($perksPage);
 
         $xpath = new DOMXPath($dom);
        
@@ -421,22 +348,20 @@ class RosterAPI {
 
         $contribArray = array();
 
-        $contribCacheFile = $this->CACHEDIR.$this->guild.'_contrib.html';
+        $contribCacheFile = Functions::getCacheDir().$this->guild.'_contrib.html';
 
-        if($this->isCached($contribCacheFile)) {
+        /*
+        if(Functions::isCached($contribCacheFile)) {
             $contribPage = file_get_contents($contribCacheFile);
         } else {
             $contribPage = file_get_contents($this->guildSummaryURLBuilder());
             file_put_contents($contribCacheFile, $contribPage);
         }
-
-        /*
-        $dom = new domDocument;
-        $dom->loadHTML($contribPage);    
-        $dom->preserveWhiteSpace = false;
         */
 
-        $dom = $this->loadNewDom($contribPage);
+        $contribPage = Functions::getPageContents($this->guildSummaryURLBuilder(), $contribCacheFile);
+
+        $dom = Functions::loadNewDom($contribPage);
 
         $xpath = new DOMXPath($dom);
 
@@ -468,23 +393,20 @@ class RosterAPI {
      */
     public function getGender() {
 
-        $guildCacheFile = $this->CACHEDIR.$this->guild.'_roster.html';
-  
-        if($this->isCached($guildCacheFile)) {
+        $guildCacheFile = Functions::getCacheDir().$this->guild.'_roster.html';
+ 
+        /* 
+        if(Functions::isCached($guildCacheFile)) {
             $guildPage = file_get_contents($guildCacheFile);
         } else {
             $guildPage = file_get_contents($this->guildRosterURLBuilder());
             file_put_contents($guildCacheFile, $guildPage);
         }
-
-        /*
-        $dom = new domDocument;
-        $dom->loadHTML($guildPage);    
-        $dom->preserveWhiteSpace = false;
         */
 
-        $dom = $this->loadNewDom($guildPage);
+        $guildPage = Functions::getPageContents($this->guildRosterURLBuilder(), $guildCacheFile);
 
+        $dom = Functions::loadNewDom($guildPage);
 
         $roster = $dom->getElementsByTagName('tbody');
         $char = $roster->item(0)->getElementsByTagName('tr');
@@ -836,8 +758,8 @@ class RosterAPI {
                  * Checks to see if the Gem has been cached, this will
                  * lower requests and speed up result times. 
                  */
-                $gemCacheFile = $this->CACHEDIR.$gemId[4].'.html';
-                if($this->isCached($gemCacheFile, true)) {
+                $gemCacheFile = Functions::getCacheDir().$gemId[4].'.html';
+                if(Functions::isCached($gemCacheFile, true)) {
 
                     $gemPage = file_get_contents($gemCacheFile);
 
@@ -848,7 +770,7 @@ class RosterAPI {
                 }
 
 
-                $dom = $this->loadNewDom($gemPage);
+                $dom = Functions::loadNewDom($gemPage);
                 $gXP = new DOMXPath($dom);
 
                 /*
@@ -887,6 +809,43 @@ class RosterAPI {
 
         return $itemArray;
     }
+
+    /*
+     *
+     * This function takes in two parameters, a Statistic Page Number and
+     * and a Statistic Name. This is currently the most efficent way to pull the
+     * information from the WoW Roster.
+     *
+     * Statistic Page Numbers:
+     * 131 - Character
+     * 141 - Combat
+     * 128 - Kills
+     * 122 - Deaths
+     * 133 - Quests
+     * 14807 - Dungeons & Raids
+     * 132 - Skills
+     * 134 - Travel
+     * 131 - Social
+     * 21 - PvP
+     *
+     * To find a list of valid "Statistic Names" open a web browser to:
+     * http://us.battle.net/wow/en/character/YOURSERVER/YOURCHARACTER/statistic
+     * 
+     * Click on any of the specific Statistic categories on the side bar(Character, 
+     * Combat, Kills, etc.). Then copy any Statistic name. 
+     * 
+     * For example:
+     * In Social(131), the Statistic Name would be "Number of hugs"
+     *
+     * The function would be called by:
+     * getStatistic(131, "Number of hugs");
+     *
+     */
+     public function getStatistic($statisticNumber, $statisticName) {
+
+        return $this->statistics->getStatistic($statisticName, $statisticNumber, $this->character, $this->server);
+
+     }
   
 }
 
