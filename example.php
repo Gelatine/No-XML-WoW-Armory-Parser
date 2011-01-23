@@ -83,4 +83,10 @@ $itemArray = $api->getItems();
  * $itemArray[ITEM_INDEX]["name OR level OR enchant"];
  */
 
+/*
+ * Please read the documentation in RosterAPI above the
+ * function to learn how to properly use this method. 
+ */
+echo $api->getStatistic(130, "Beverages consumed");
+
 ?>
