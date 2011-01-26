@@ -251,9 +251,13 @@ class RosterAPI {
      * false. If the value is changed to true, an associative array will
      * be returned in the format of: "name" and "rank".
      *
+     * The parameter $filterLevel will only return characters matching a 
+     * specified level. By default the value is -1, meaning all characters
+     * will be returned. 
+     *
      * The array is returned. 
      */
-    public function getGuildMembers($rank = false) {
+    public function getGuildMembers($rank = false, $filterLevel=-1) {
 
         $guildArray = array();
 
@@ -279,15 +283,43 @@ class RosterAPI {
 
             $charInfo = $c->getElementsByTagName('td');
             $charName = $charInfo->item(0)->nodeValue;
-
+   
+            if($filterLevel != -1) {
+                $level = $charInfo->item(3)->nodeValue;
+            }
+ 
             if(!$rank) { 
 
-                array_push($guildArray, utf8_decode($charName));
+                
+                if($filterLevel != -1) {
+                    
+                    if($level == $filterLevel) {
+                        array_push($guildArray, utf8_decode($charName));
+                    }
+
+                } else {
+
+                    array_push($guildArray, utf8_decode($charName));
+
+                }
 
             } else {
-           
-                $guildArray[utf8_decode($charName)] =
-                                     substr(trim($charInfo->item(4)->nodeValue), -1);
+
+                 if($filterLevel != -1) {
+                    
+                    if($level == $filterLevel) {
+                        $guildArray[utf8_decode($charName)] =
+                            substr(trim($charInfo->item(4)->nodeValue), -1);
+                    }
+
+                } else {
+
+                    $guildArray[utf8_decode($charName)] =
+                            substr(trim($charInfo->item(4)->nodeValue), -1);
+
+                }
+
+          
             }
         }
 
