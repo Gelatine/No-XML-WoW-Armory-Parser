@@ -41,7 +41,7 @@ class Functions {
      * 
      * Example: /path/to/cache/directory/
      */
-    private $CACHEDIR = '/path/to/cache/directory/';
+    private static $CACHEDIR = '/path/to/cache/directory/';
 
     /*
      * The $CACHETIME variable can be modified depending on how
@@ -57,7 +57,7 @@ class Functions {
      * The default $CACHETIME value is 5 Hours.
      * (60 seconds * 60 minutes)*5. 
      */
-    private $CACHETIME = 18000;
+    private static $CACHETIME = 18000;
  
     /**
      * Given a path to a file, this function first checks if
@@ -68,7 +68,7 @@ class Functions {
      *
      * An exception will be thrown if the $file variable is empty. 
      */ 
-    public static function isCached($file, $item='false') {
+    public static function isCached($file, $item = false) {
 
         //Verifies the file path is not empty. 
         if(empty($file)) {
@@ -89,7 +89,8 @@ class Functions {
 
             $timeSinceModified = strtotime("now") - filemtime($file);
 
-            if($timeSinceModified > $this->CACHETIME) {
+
+            if($timeSinceModified > self::$CACHETIME) {
 
                 return false;
 
