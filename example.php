@@ -36,9 +36,13 @@ $character = "Kastang";
 $api = new RosterAPI($server, $character, $guild);
 
 /*
- * Guild specific information
+ * Guild specific information, returns an associative array with
+ * guild names and ranks. If you want only guild names, change 
+ * (true) to (false) and a normal array will be returned. 
  */
-#print_r($api->getGuildMembers(true));
+//to filter by level, change getGuildMembers(true) to getGuildMembers(true, LEVEL_HERE)
+print_r($api->getGuildMembers(true));
+
 print_r($api->getGuildPerks());
 print_r($api->getTopWeeklyContributers());
 
