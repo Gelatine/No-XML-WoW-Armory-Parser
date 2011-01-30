@@ -1,4 +1,4 @@
-<?
+<? 
 /*
  * Copyright (c) 2010 Josh Grochowski (josh[at]kastang[dot]com)
  *
@@ -92,5 +92,7 @@ $itemArray = $api->getItems();
  * function to learn how to properly use this method. 
  */
 echo $api->getStatistic(130, "Beverages consumed");
+
+print_r($api->getAllStatNames(130));
 
 ?>
