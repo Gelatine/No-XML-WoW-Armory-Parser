@@ -1,5 +1,4 @@
 <?
-
     /*
      * Copyright (c) 2010 Josh Grochowski (josh[at]kastang[dot]com)
      *
@@ -80,15 +79,6 @@ class Statistics {
         
         $cacheFileName = Functions::getCacheDir().$statisticNumber.'_'.$character.'.html';
 
-        /**
-        if(Functions::isCached($cacheFileName)) {
-            $contents = file_get_contents($cacheFileName);
-        } else {
-            $contents = file_get_contents($this->statisticURLBuilder($statisticNumber, $character, $server));
-            file_put_contents($cacheFileName, $contents);
-        }
-        */
-        
         $contents = Functions::getPageContents($this->statisticURLBuilder($statisticNumber, $character, $server), $cacheFileName);
 
         $dom = Functions::loadNewDom($contents);
@@ -123,11 +113,35 @@ class Statistics {
 
 
     }
-    
-    public function getSocialStatistic($statisticName, $character, $server) {
-        return $this->getStatistic($statisticName, 131, $character, $server);
-    }
 
+    /*
+     * Given an Array number, Character Name, and Server (Character Name and Server
+     * are required inorder to pull the information), an Array of all the Statistic 
+     * names wil be returned. 
+     */
+    public function getAllStatNames($statisticNumber, $character, $server) {
+         
+        $cacheFileName = Functions::getCacheDir().$statisticNumber.'_'.$character.'.html';
+
+        $contents = Functions::getPageContents($this->statisticURLBuilder($statisticNumber, $character, $server), $cacheFileName);
+
+        $dom = Functions::loadNewDom($contents);
+        $xpath = new DomXPath($dom);
+        $statistics = $xpath->query('//dl/dt');
+
+        $statisticNames = array();
+
+        foreach($statistics as $s) {
+
+            $currStatName = trim($s->textContent);
+
+            array_push($statisticNames, $currStatName);
+
+        }
+
+        return $statisticNames;
+    
+    }
 }
 
 
