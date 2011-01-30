@@ -180,18 +180,6 @@ class RosterAPI {
 
         $characterCacheFile = Functions::getCacheDir().$this->character.'.html';
        
-        /* 
-        if(Functions::isCached($characterCacheFile)) {
-
-            $this->characterPage = file_get_contents($characterCacheFile);
-
-        } else { 
-
-            $this->characterPage = file_get_contents($this->charPageURLBuilder());
-            file_put_contents($characterCacheFile, $this->characterPage);
-        }
-        */
-
         $this->characterPage = Functions::getPageContents($this->charPageURLBuilder(), $characterCacheFile);
        
         /*
@@ -263,15 +251,6 @@ class RosterAPI {
 
         $guildCacheFile = Functions::getCacheDir().$this->guild.'_roster.html';
  
-        /* 
-        if(Functions::isCached($guildCacheFile)) {
-            $guildPage = file_get_contents($guildCacheFile);
-        } else {
-            $guildPage = file_get_contents($this->guildRosterURLBuilder());
-            file_put_contents($guildCacheFile, $guildPage);
-        }
-        */
-        
         $guildPage = Functions::getPageContents($this->guildRosterURLBuilder(), $guildCacheFile);
 
         $dom = Functions::loadNewDom($guildPage);
@@ -338,16 +317,6 @@ class RosterAPI {
 
         $perksCacheFile = Functions::getCacheDir().$this->guild.'_perks.html';
 
-
-        /*
-        if(Functions::isCached($perksCacheFile)) {
-            $perksPage = file_get_contents($perksCacheFile);
-        } else {
-            $perksPage = file_get_contents($this->guildPerksURLBuilder());
-            file_put_contents($perksCacheFile, $perksPage);
-        }
-        */
-
         $perksPage = Functions::getPageContents($this->guildPerksURLBuilder(), $perksCacheFile);
 
         $dom = Functions::loadNewDom($perksPage);
@@ -381,15 +350,6 @@ class RosterAPI {
         $contribArray = array();
 
         $contribCacheFile = Functions::getCacheDir().$this->guild.'_contrib.html';
-
-        /*
-        if(Functions::isCached($contribCacheFile)) {
-            $contribPage = file_get_contents($contribCacheFile);
-        } else {
-            $contribPage = file_get_contents($this->guildSummaryURLBuilder());
-            file_put_contents($contribCacheFile, $contribPage);
-        }
-        */
 
         $contribPage = Functions::getPageContents($this->guildSummaryURLBuilder(), $contribCacheFile);
 
@@ -427,15 +387,6 @@ class RosterAPI {
 
         $guildCacheFile = Functions::getCacheDir().$this->guild.'_roster.html';
  
-        /* 
-        if(Functions::isCached($guildCacheFile)) {
-            $guildPage = file_get_contents($guildCacheFile);
-        } else {
-            $guildPage = file_get_contents($this->guildRosterURLBuilder());
-            file_put_contents($guildCacheFile, $guildPage);
-        }
-        */
-
         $guildPage = Functions::getPageContents($this->guildRosterURLBuilder(), $guildCacheFile);
 
         $dom = Functions::loadNewDom($guildPage);
@@ -878,7 +829,17 @@ class RosterAPI {
         return $this->statistics->getStatistic($statisticName, $statisticNumber, $this->character, $this->server);
 
      }
-  
+
+
+    /*
+     * This function takes in a statistic number (see getStatistics for a list of valid numbers)
+     * and will return an Array of all Statistic names. 
+     */
+    public function getAllStatNames($statisticNumber) {
+
+       return $this->statistics->getAllStatNames($statisticNumber, $this->character, $this->server);
+
+     }
 }
 
 ?>
