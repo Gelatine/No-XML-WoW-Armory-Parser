@@ -95,4 +95,9 @@ echo $api->getStatistic(130, "Beverages consumed");
 
 print_r($api->getAllStatNames(130));
 
+/*
+ * Returns an associative array of Glyphs for the character. 
+ */
+print_r($api->getGlyphs());
+
 ?>
