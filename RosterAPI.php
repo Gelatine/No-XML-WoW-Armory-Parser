@@ -46,6 +46,7 @@
 header('Content-Type: text/html; charset=UTF-8');
 include_once('Functions.php');
 include('Statistics.php');
+include('Glyphs.php');
 
 class RosterAPI {
 
@@ -69,6 +70,7 @@ class RosterAPI {
     private $characterPage = null;
 
     private $statistics = null;
+    private $glyphs = null;
 
     /**
      * The constructor requires a $server be specified
@@ -120,6 +122,7 @@ class RosterAPI {
 
            
         $this->statistics = new Statistics(); 
+        $this->glyphs = new Glyphs();
     }
 
     /**
@@ -839,7 +842,21 @@ class RosterAPI {
 
        return $this->statistics->getAllStatNames($statisticNumber, $this->character, $this->server);
 
-     }
+    }
+
+    /**
+     * This function will return an Associative Array of Glyphs for the
+     * character. 
+     *
+     * The Associative Array format is:
+     * "name" - Name of Glyph
+     * "type" - Major, Minor, or Prime Glyph
+     * "url" - URL of the Glyph
+     * "itemNumber" - Unique item number of the Glyph. 
+     */
+    public function getGlyphs() {
+        return $this->glyphs->getGlyphs($this->character, $this->server);
+    }
 }
 
 ?>
