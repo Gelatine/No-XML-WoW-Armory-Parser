@@ -34,14 +34,24 @@
 class Functions {
 
     /*
-     * The $CACHEDIR variable must be the absolute path to 
+     * The $CHAR_PAGE_URL and $GUILD_PAGE_URL variables should not need
+     * to be altered if you are pulling from the US WoW Armory.
+     *
+     * As confirmed by Oldertarl or Lightbringer, this Class will also 
+     * work on the European WoW Armory by changing 'US' to 'EU'. 
+     */
+    private static $CHAR_PAGE_URL = "http://us.battle.net/wow/en/character/";
+    private static $GUILD_PAGE_URL = "http://us.battle.net/wow/en/guild/";
+
+    /*
+     * The $CACHEDIR variable must be the __ABSOLUTE PATH__ to 
      * a desired cache directory. The directory must have write
      * permissions (chmod 777 the directory). The path should also 
      * contain a trailing slash ('/'). 
      * 
      * Example: /path/to/cache/directory/
      */
-    private static $CACHEDIR = '/path/to/cache/directory/';
+    private static $CACHEDIR = '/home/kastang/PHP/cache/';
 
     /*
      * The $CACHETIME variable can be modified depending on how
@@ -55,7 +65,7 @@ class Functions {
      * number of requests per minute/hour/day. 
      *
      * The default $CACHETIME value is 5 Hours.
-     * (60 seconds * 60 minutes)*5. 
+     * (62 seconds * 60 minutes)*5. 
      */
     private static $CACHETIME = 18000;
  
@@ -89,22 +99,14 @@ class Functions {
 
             $timeSinceModified = strtotime("now") - filemtime($file);
 
-
             if($timeSinceModified > self::$CACHETIME) {
-
                 return false;
-
             } else {
-
                 return true;
             }
-
         } else {
-
             return false;
-
         }
-
     }
 
     /**
@@ -153,7 +155,6 @@ class Functions {
 
             return $content;
         }
-
     }
     
     /**
@@ -179,6 +180,20 @@ class Functions {
      */
     public function getCacheDir() {
         return self::$CACHEDIR;
+    }
+
+    /**
+     * Returns the $CHAR_PAGE_URL path
+     */
+    public function getCharPageURL() {
+        return self::$CHAR_PAGE_URL;
+    }
+
+    /**
+     * Returns the $GUILD_PAGE_URL path
+     */
+    public function getGuildPageURL() {
+        return self::$GUILD_PAGE_URL;
     }
 }
 
