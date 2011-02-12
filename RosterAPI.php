@@ -29,10 +29,11 @@
  * Character:
  * Level, Race, Class, Achievement Points, Health, Power, 
  * Professions(names/values), Talents(names/points), 
- * Equipped Item Level, Equipped Items(name, enchants, level, gems). 
+ * Equipped Item Level, Equipped Items(name, enchants, level, gems),
+ * Statistics, Glyphs
  *
  * Guild:
- * Names, Perks, Top Weekly Contributers. 
+ * Names, Perks, Top Weekly Contributers, Size
  *
  * No additional libraries are needed other then what is included by 
  * default with __PHP5__. 
@@ -52,10 +53,10 @@ class RosterAPI {
 
     /*
      * The $CHAR_PAGE_URL and $GUILD_PAGE_URL variables should not need
-     * to be altered if you are pulling from the US WoW Armory. In theory
-     * the URL can be modified for the Europen WoW Armory by changeing
-     * 'us' to 'eu', but functionality HAS NOT BEEN TESTED ON EUROPEAN
-     * SERVERS. 
+     * to be altered if you are pulling from the US WoW Armory.
+     *
+     * As confirmed by Oldertarl or Lightbringer, this Class will also 
+     * work on the European WoW Armory by changing 'US' to 'EU'. 
      */
     private $CHAR_PAGE_URL = "http://us.battle.net/wow/en/character/";
     private $GUILD_PAGE_URL = "http://us.battle.net/wow/en/guild/";
@@ -119,7 +120,6 @@ class RosterAPI {
             $this->character = $character;
             $this->changeCharacter($character);
         }
-
            
         $this->statistics = new Statistics(); 
         $this->glyphs = new Glyphs();
@@ -149,9 +149,9 @@ class RosterAPI {
      * This function returns the URL for the Guild Roster page for user-set 
      * server and guild. 
      */
-    private function guildRosterURLBuilder() {
+    private function guildRosterURLBuilder($pageNumber=1) {
 
-        $guildPage = $this->GUILD_PAGE_URL.$this->server.'/'.$this->guild.'/roster';
+        $guildPage = $this->GUILD_PAGE_URL.$this->server.'/'.$this->guild.'/roster?page='.$pageNumber;
         return $guildPage;
     }
 
@@ -231,6 +231,21 @@ class RosterAPI {
     }
 
     /**
+     * Returns the total number of characters in a guild. 
+     */
+    public function getGuildSize() {
+
+        $guildCacheFile = Functions::getCacheDir().$this->guild.'_roster.html';
+        $guildPage = Functions::getPageContents($this->guildRosterURLBuilder(), $guildCacheFile);
+        $dom = Functions::loadNewDom($guildPage);
+        $xpath = new DOMXPath($dom);
+        $memberCount = $xpath->query('//strong[@class="results-total"]')->item(0)->nodeValue;
+
+        return $memberCount;
+
+    }
+
+    /**
      * This function pulls every character name from the Guild Roster
      * and stores them in an array. If the Guild Roster is cached (and
      * withing caching time), the information will be pulled locally.
@@ -252,56 +267,65 @@ class RosterAPI {
 
         $guildArray = array();
 
-        $guildCacheFile = Functions::getCacheDir().$this->guild.'_roster.html';
- 
-        $guildPage = Functions::getPageContents($this->guildRosterURLBuilder(), $guildCacheFile);
+        /*
+         * The Roster only displays 100 characters per page. The total number of members
+         * in the guild must first be determined before returning an array of all guild
+         * members. 
+         *
+         * ---Thanks to Oldertarl for notifying me, and providing a solution of the WoW Roster change. 
+         */
+        $memberCount = $this->getGuildSize();
 
-        $dom = Functions::loadNewDom($guildPage);
+        for($ctr=1; $ctr<=ceil($memberCount/100); $ctr++) {
 
-        $roster = $dom->getElementsByTagName('tbody');
-        $char = $roster->item(0)->getElementsByTagName('tr');
- 
-        foreach ($char as $c) {
+            $rosterCacheFile = Functions::getCacheDir().$this->guild.'_roster_'.$ctr.'.html';
+            $rosterPage = Functions::getPageContents($this->guildRosterURLBuilder($ctr), $rosterCacheFile);
 
-            $charInfo = $c->getElementsByTagName('td');
-            $charName = $charInfo->item(0)->nodeValue;
-   
-            if($filterLevel != -1) {
-                $level = $charInfo->item(3)->nodeValue;
-            }
- 
-            if(!$rank) { 
+            $dom = Functions::loadNewDom($rosterPage);
+            $roster = $dom->getElementsByTagName('tbody');
+            $char = $roster->item(0)->getElementsByTagName('tr');
 
-                
+            foreach ($char as $c) {
+
+                $charInfo = $c->getElementsByTagName('td');
+                $charName = $charInfo->item(0)->nodeValue;
+       
                 if($filterLevel != -1) {
+                    $level = $charInfo->item(3)->nodeValue;
+                }
+     
+                if(!$rank) { 
                     
-                    if($level == $filterLevel) {
+                    if($filterLevel != -1) {
+                        
+                        if($level == $filterLevel) {
+                            array_push($guildArray, utf8_decode($charName));
+                        }
+
+                    } else {
+
                         array_push($guildArray, utf8_decode($charName));
+
                     }
 
                 } else {
 
-                    array_push($guildArray, utf8_decode($charName));
+                     if($filterLevel != -1) {
+                        
+                        if($level == $filterLevel) {
+                            $guildArray[utf8_decode($charName)] =
+                                substr(trim($charInfo->item(4)->nodeValue), -1);
+                        }
 
-                }
+                    } else {
 
-            } else {
-
-                 if($filterLevel != -1) {
-                    
-                    if($level == $filterLevel) {
                         $guildArray[utf8_decode($charName)] =
-                            substr(trim($charInfo->item(4)->nodeValue), -1);
+                                substr(trim($charInfo->item(4)->nodeValue), -1);
+
                     }
 
-                } else {
-
-                    $guildArray[utf8_decode($charName)] =
-                            substr(trim($charInfo->item(4)->nodeValue), -1);
-
+              
                 }
-
-          
             }
         }
 
@@ -317,13 +341,9 @@ class RosterAPI {
     public function getGuildPerks() {
 
         $perksArray = array();
-
         $perksCacheFile = Functions::getCacheDir().$this->guild.'_perks.html';
-
         $perksPage = Functions::getPageContents($this->guildPerksURLBuilder(), $perksCacheFile);
-
         $dom = Functions::loadNewDom($perksPage);
-
         $xpath = new DOMXPath($dom);
        
         //p1, p2, p3,..., pn 
@@ -351,15 +371,10 @@ class RosterAPI {
     public function getTopWeeklyContributers() {
 
         $contribArray = array();
-
         $contribCacheFile = Functions::getCacheDir().$this->guild.'_contrib.html';
-
         $contribPage = Functions::getPageContents($this->guildSummaryURLBuilder(), $contribCacheFile);
-
         $dom = Functions::loadNewDom($contribPage);
-
         $xpath = new DOMXPath($dom);
-
         $contrib = $xpath->query('//td[@class="name"]/a');
         
         $MAX_CONTRIB = 5;
@@ -388,29 +403,36 @@ class RosterAPI {
      */
     public function getGender() {
 
-        $guildCacheFile = Functions::getCacheDir().$this->guild.'_roster.html';
- 
-        $guildPage = Functions::getPageContents($this->guildRosterURLBuilder(), $guildCacheFile);
+        /**
+         * Get the total number of members in the guild. 
+         */
 
-        $dom = Functions::loadNewDom($guildPage);
+        $memberCount = $this->getGuildSize();
+        for($ctr=1; $ctr<=ceil($memberCount/100); $ctr++) {
 
-        $roster = $dom->getElementsByTagName('tbody');
-        $char = $roster->item(0)->getElementsByTagName('tr');
+            $rosterCacheFile = Functions::getCacheDir().$this->guild.'_roster_'.$ctr.'.html';
+            $rosterPage = Functions::getPageContents($this->guildRosterURLBuilder($ctr), $rosterCacheFile);
 
-        /*
-         * Loop through every character in the guild until the character
-         * is found. When it is found, return the gender Id based off the
-         * image link on the Roster. 
-         */ 
-        foreach ($char as $c) {
+            $dom = Functions::loadNewDom($rosterPage);
+            $roster = $dom->getElementsByTagName('tbody');
+            $char = $roster->item(0)->getElementsByTagName('tr');
 
-            $charInfo = $c->getElementsByTagName('td');
-            $charImages = $c->getElementsByTagName('img');
 
-            if(strtolower($charInfo->item(0)->nodeValue) == strtolower($this->character)) {
-                return substr($charImages->item(0)->getAttribute('src'),-5,1);
+            /*
+             * Loop through every character in the guild until the character
+             * is found. When it is found, return the gender Id based off the
+             * image link on the Roster. 
+             */ 
+            foreach ($char as $c) {
+
+                $charInfo = $c->getElementsByTagName('td');
+                $charImages = $c->getElementsByTagName('img');
+
+                if(strtolower($charInfo->item(0)->nodeValue) == strtolower($this->character)) {
+                    return substr($charImages->item(0)->getAttribute('src'),-5,1);
+                }
+
             }
-
         }
 
         return null;
