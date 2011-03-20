@@ -370,7 +370,7 @@ class RosterAPI {
 
         while($counter < $MAX_CONTRIB) {
 
-            array_push($contribArray, $contrib->item($counter)->nodeValue);
+            array_push($contribArray, utf8_decode($contrib->item($counter)->nodeValue));
 
             $counter++;
         }
