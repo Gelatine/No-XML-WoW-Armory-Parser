@@ -58,16 +58,12 @@ include_once('Functions.php');
 
 class Statistics {
 
-
     /**
      * Given a Character Name, Server, and Statistic Page number, a URL for the Statistic 
      * page will be returned. 
      */
     private static function statisticURLBuilder($statPageNumber, $character, $server) {
-        
-            $baseUrl = "http://us.battle.net/wow/en/character/";
-            return $baseUrl.$server.'/'.$character.'/statistic/'.$statPageNumber;
-
+            return Functions::getCharPageURL().$server.'/'.$character.'/statistic/'.$statPageNumber;
     }
 
     /**
@@ -75,10 +71,8 @@ class Statistics {
      * top of this class and above the function getStatistic in RosterAPI.php
      */
     public function getStatistic($statName, $statisticNumber, $character, $server) {
-
         
         $cacheFileName = Functions::getCacheDir().$statisticNumber.'_'.$character.'.html';
-
         $contents = Functions::getPageContents($this->statisticURLBuilder($statisticNumber, $character, $server), $cacheFileName);
 
         $dom = Functions::loadNewDom($contents);

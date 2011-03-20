@@ -51,17 +51,7 @@ include('Glyphs.php');
 
 class RosterAPI {
 
-    /*
-     * The $CHAR_PAGE_URL and $GUILD_PAGE_URL variables should not need
-     * to be altered if you are pulling from the US WoW Armory.
-     *
-     * As confirmed by Oldertarl or Lightbringer, this Class will also 
-     * work on the European WoW Armory by changing 'US' to 'EU'. 
-     */
-    private $CHAR_PAGE_URL = "http://us.battle.net/wow/en/character/";
-    private $GUILD_PAGE_URL = "http://us.battle.net/wow/en/guild/";
-
-    /* 
+   /* 
      * The below values should not be modified. 
      */
     private $characterDom = null;
@@ -131,7 +121,7 @@ class RosterAPI {
      */
     private function guildSummaryURLBuilder() {
 
-        $guildSummary = $this->GUILD_PAGE_URL.$this->server.'/'.$this->guild.'/';
+        $guildSummary = Functions::getGuildPageURL().$this->server.'/'.$this->guild.'/';
         return $guildSummary;
     }
 
@@ -141,7 +131,7 @@ class RosterAPI {
      */
     private function guildPerksURLBuilder() {
 
-        $guildPerk = $this->GUILD_PAGE_URL.$this->server.'/'.$this->guild.'/perk';
+        $guildPerk = Functions::getGuildPageURL().$this->server.'/'.$this->guild.'/perk';
         return $guildPerk;
     }
 
@@ -151,7 +141,7 @@ class RosterAPI {
      */
     private function guildRosterURLBuilder($pageNumber=1) {
 
-        $guildPage = $this->GUILD_PAGE_URL.$this->server.'/'.$this->guild.'/roster?page='.$pageNumber;
+        $guildPage = Functions::getGuildPageURL().$this->server.'/'.$this->guild.'/roster?page='.$pageNumber;
         return $guildPage;
     }
 
@@ -161,7 +151,7 @@ class RosterAPI {
      */
     private function charPageURLBuilder() {
 
-        $charPage = $this->CHAR_PAGE_URL.$this->server.'/'.$this->character.'/advanced';
+        $charPage = Functions::getCharPageURL().$this->server.'/'.$this->character.'/advanced';
         return $charPage;
     }
 
@@ -180,9 +170,7 @@ class RosterAPI {
         }
 
         $this->character = $character;
-
         $characterCacheFile = Functions::getCacheDir().$this->character.'.html';
-       
         $this->characterPage = Functions::getPageContents($this->charPageURLBuilder(), $characterCacheFile);
        
         /*
@@ -428,7 +416,7 @@ class RosterAPI {
                 $charInfo = $c->getElementsByTagName('td');
                 $charImages = $c->getElementsByTagName('img');
 
-                if(strtolower($charInfo->item(0)->nodeValue) == strtolower($this->character)) {
+                if(strtolower(utf8_decode($charInfo->item(0)->nodeValue)) == strtolower($this->character)) {
                     return substr($charImages->item(0)->getAttribute('src'),-5,1);
                 }
 

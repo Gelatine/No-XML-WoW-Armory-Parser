@@ -28,9 +28,9 @@ include('./RosterAPI.php');
  * Set the $server, $character, and $guild
  * variables with your information
  */
-$server = "Eitrigg";
-$guild = "We Know";
-$character = "Kastang";
+$server = "YOUR_SERVER_HERE";
+$guild = "YOUR_GUILD_HERE";
+$character = "YOUR_CHARACTER_HERE";
 
 //Creates the RosterAPI Object. 
 $api = new RosterAPI($server, $character, $guild);

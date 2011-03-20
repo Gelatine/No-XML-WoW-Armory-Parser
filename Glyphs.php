@@ -29,10 +29,7 @@ class Glyphs {
      * Given a Character and Server, builds the Talent Page URL. 
      */
     private static function talentURLBuilder($character, $server) {
-        
-            $baseUrl = "http://us.battle.net/wow/en/character/";
-            return $baseUrl.$server.'/'.$character.'/talent/primary';
-
+            return Functions::getCharPageURL().$server.'/'.$character.'/talent/primary';
     }
 
     /**
