@@ -343,7 +343,7 @@ class RosterAPI {
         while($index < $guildLevel) {
 
             $perk = $xpath->query('//li[@id="'.$p.$index.'"]/div/strong');
-            array_push($perksArray, $perk->item(0)->nodeValue);
+            array_push(utf8_decode($perksArray, $perk->item(0)->nodeValue));
             $index++;
         }
 
@@ -648,8 +648,8 @@ class RosterAPI {
         $statValue = $xpath->query('//li[@data-id="'.$stat.'"]/span[@class="value"]');
 
         
-        $statArray = array("name" => $statName->item(0)->nodeValue,
-                            "value" => $statValue->item(0)->nodeValue);
+        $statArray = array("name" => utf8_decode($statName->item(0)->nodeValue),
+                            "value" => utf8_decode($statValue->item(0)->nodeValue));
 
         return $statArray;
     }
@@ -776,7 +776,7 @@ class RosterAPI {
                 $gn = $gXP->query('//title');
                 $gemName = explode("-", $gn->item(0)->nodeValue);
 
-                array_push($gemNameArray, $gemName[0]);
+                array_push($gemNameArray, utf8_decode($gemName[0]));
 
             }
 
@@ -787,9 +787,9 @@ class RosterAPI {
              */
             $tmp = array(
 
-                    "name" => @$itemName->item(0)->nodeValue,
+                    "name" => utf8_decode(@$itemName->item(0)->nodeValue),
                     "level" => @$itemLevel->item(0)->nodeValue,
-                    "enchant" => trim(@$itemEnchant->item(0)->nodeValue),
+                    "enchant" => trim(utf8_decode(@$itemEnchant->item(0)->nodeValue)),
                     "gems" => @$gemNameArray);
 
             /*
