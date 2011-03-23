@@ -129,7 +129,7 @@ class Statistics {
 
             $currStatName = trim($s->textContent);
 
-            array_push($statisticNames, $currStatName);
+            array_push($statisticNames, utf8_decode($currStatName));
 
         }
 
