@@ -65,7 +65,7 @@ class Glyphs {
                 $itemNumber = explode("/", $glyphLinks->item($ctr)->nodeValue);
 
                 $tmpArray = array(
-                    "name" => trim($g->nodeValue),
+                    "name" => trim(utf8_decode($g->nodeValue)),
                     "type" => $gT,
                     "url" => $glyphLinks->item($ctr)->nodeValue,
                     "itemNumber" => $itemNumber[4] );
